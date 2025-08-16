@@ -1,45 +1,48 @@
 import { School, Users, UserCheck, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-
-const stats = [
-  {
-    name: 'Total Institutes',
-    value: '12',
-    change: '+2',
-    changeType: 'positive',
-    icon: School,
-    description: 'Active institutes'
-  },
-  {
-    name: 'Total Students',
-    value: '2,847',
-    change: '+156',
-    changeType: 'positive',
-    icon: Users,
-    description: 'Enrolled students'
-  },
-  {
-    name: 'Staff Members',
-    value: '342',
-    change: '+18',
-    changeType: 'positive',
-    icon: UserCheck,
-    description: 'Active staff'
-  },
-  {
-    name: 'Monthly Revenue',
-    value: '₹18.4L',
-    change: '-2.3%',
-    changeType: 'negative',
-    icon: DollarSign,
-    description: 'This month'
-  },
-];
+import { useDataStore } from '@/hooks/useDataStore';
 
 export function StatsCards() {
+  const { stats } = useDataStore();
+  
+  const statsData = [
+    {
+      name: 'Total Institutes',
+      value: stats.totalInstitutes.toString(),
+      change: stats.instituteGrowth,
+      changeType: 'positive' as const,
+      icon: School,
+      description: 'Active institutes'
+    },
+    {
+      name: 'Total Students',
+      value: stats.totalStudents.toLocaleString(),
+      change: stats.studentGrowth,
+      changeType: 'positive' as const,
+      icon: Users,
+      description: 'Enrolled students'
+    },
+    {
+      name: 'Staff Members',
+      value: stats.totalStaff.toString(),
+      change: '+18',
+      changeType: 'positive' as const,
+      icon: UserCheck,
+      description: 'Active staff'
+    },
+    {
+      name: 'Monthly Revenue',
+      value: `₹${(stats.monthlyRevenue / 100000).toFixed(1)}L`,
+      change: stats.revenueGrowth,
+      changeType: stats.revenueGrowth.startsWith('+') ? 'positive' as const : 'negative' as const,
+      icon: DollarSign,
+      description: 'This month'
+    },
+  ];
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-      {stats.map((stat, index) => (
+      {statsData.map((stat, index) => (
         <Card key={index} className="bg-gradient-card shadow-elegant border-0">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">

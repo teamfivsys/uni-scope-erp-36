@@ -2,55 +2,40 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Users, Phone, Eye } from 'lucide-react';
-
-const institutes = [
-  {
-    id: 1,
-    name: 'Tech Academy',
-    location: 'Mumbai, Maharashtra',
-    students: 425,
-    staff: 38,
-    status: 'Active',
-    type: 'Engineering College',
-  },
-  {
-    id: 2,
-    name: 'Science College',
-    location: 'Delhi, NCR',
-    students: 652,
-    staff: 74,
-    status: 'Active',
-    type: 'Degree College',
-  },
-  {
-    id: 3,
-    name: 'Creative Arts Academy',
-    location: 'Bangalore, Karnataka',
-    students: 187,
-    staff: 23,
-    status: 'Active',
-    type: 'Arts Institute',
-  },
-  {
-    id: 4,
-    name: 'Business School',
-    location: 'Chennai, Tamil Nadu',
-    students: 298,
-    staff: 35,
-    status: 'Active',
-    type: 'Management Institute',
-  },
-];
+import { useDataStore } from '@/hooks/useDataStore';
+import { useNavigate } from 'react-router-dom';
 
 export function InstituteOverview() {
+  const { institutes, students, staff } = useDataStore();
+  const navigate = useNavigate();
+  
+  // Calculate students and staff per institute
+  const institutesWithCounts = institutes.slice(0, 4).map(institute => {
+    const instituteStudents = students.filter(s => s.instituteId === institute.id).length;
+    const instituteStaff = staff.filter(s => s.instituteId === institute.id).length;
+    
+    return {
+      ...institute,
+      students: instituteStudents,
+      staff: instituteStaff
+    };
+  });
+
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Institute Overview</CardTitle>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => navigate('/institutes')}
+        >
+          View All
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {institutes.map((institute) => (
+          {institutesWithCounts.map((institute) => (
             <div key={institute.id} className="flex items-center justify-between p-4 rounded-lg border border-border hover:shadow-md transition-shadow">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center">

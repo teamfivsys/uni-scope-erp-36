@@ -8,22 +8,29 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { InstituteForm } from './InstituteForm';
 import { InstituteDetails } from './InstituteDetails';
-
-const mockInstitutes = [
-  { id: 1, name: 'Tech Academy', type: 'Engineering College', location: 'Mumbai, Maharashtra', students: 1200, staff: 85, status: 'Active', established: '2010' },
-  { id: 2, name: 'Science College', type: 'General College', location: 'Delhi, Delhi', students: 980, staff: 67, status: 'Active', established: '2005' },
-  { id: 3, name: 'Creative Arts Academy', type: 'Arts College', location: 'Bangalore, Karnataka', students: 450, staff: 32, status: 'Active', established: '2015' },
-  { id: 4, name: 'Business School', type: 'Management Institute', location: 'Pune, Maharashtra', students: 650, staff: 48, status: 'Inactive', established: '2012' },
-];
+import { useDataStore } from '@/hooks/useDataStore';
+import { Institute } from '@/lib/data/mockData';
 
 export function InstituteManagement() {
-  const [institutes] = useState(mockInstitutes);
+  const { institutes, students, staff, deleteInstitute } = useDataStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const [selectedInstitute, setSelectedInstitute] = useState<any>(null);
+  const [selectedInstitute, setSelectedInstitute] = useState<Institute | null>(null);
 
-  const filteredInstitutes = institutes.filter(institute =>
+  // Calculate students and staff per institute
+  const institutesWithCounts = institutes.map(institute => {
+    const instituteStudents = students.filter(s => s.instituteId === institute.id).length;
+    const instituteStaff = staff.filter(s => s.instituteId === institute.id).length;
+    
+    return {
+      ...institute,
+      students: instituteStudents,
+      staff: instituteStaff
+    };
+  });
+
+  const filteredInstitutes = institutesWithCounts.filter(institute =>
     institute.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     institute.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
     institute.location.toLowerCase().includes(searchTerm.toLowerCase())
@@ -118,7 +125,14 @@ export function InstituteManagement() {
                           <Edit className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
+                        <DropdownMenuItem 
+                          className="text-destructive"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete ${institute.name}? This will also remove all associated students and staff.`)) {
+                              deleteInstitute(institute.id);
+                            }
+                          }}
+                        >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Delete
                         </DropdownMenuItem>

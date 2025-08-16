@@ -1,307 +1,206 @@
+import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Mail, Phone, MapPin, Calendar, GraduationCap, DollarSign, ClipboardList } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { 
+  User, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Calendar, 
+  GraduationCap, 
+  DollarSign,
+  FileText,
+  UserCheck,
+  Edit
+} from 'lucide-react';
+import { Student } from '@/lib/data/mockData';
 
 interface StudentDetailsProps {
-  student: any;
+  student: Student;
   open: boolean;
   onClose: () => void;
+  onEdit?: () => void;
 }
 
-export function StudentDetails({ student, open, onClose }: StudentDetailsProps) {
+export function StudentDetails({ student, open, onClose, onEdit }: StudentDetailsProps) {
+  const feePercentage = (student.paidFees / student.totalFees) * 100;
+  const pendingFees = student.totalFees - student.paidFees;
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Active': return 'bg-success text-success-foreground';
+      case 'Inactive': return 'bg-muted text-muted-foreground';
+      case 'Graduated': return 'bg-info text-info-foreground';
+      default: return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const getFeeStatusColor = (status: string) => {
+    switch (status) {
+      case 'Paid': return 'bg-success text-success-foreground';
+      case 'Pending': return 'bg-warning text-warning-foreground';
+      case 'Overdue': return 'bg-destructive text-destructive-foreground';
+      default: return 'bg-muted text-muted-foreground';
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center space-x-3">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src="" alt={student.name} />
-              <AvatarFallback>{student.name.split(' ').map((n: string) => n[0]).join('')}</AvatarFallback>
-            </Avatar>
-            <div>
-              <span>{student.name}</span>
-              <div className="flex items-center space-x-2 mt-1">
-                <Badge variant={student.status === 'Active' ? 'default' : 'secondary'}>
-                  {student.status}
-                </Badge>
-                <Badge variant={
-                  student.feeStatus === 'Paid' ? 'default' : 
-                  student.feeStatus === 'Due' ? 'secondary' : 'destructive'
-                }>
-                  {student.feeStatus}
-                </Badge>
-              </div>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-2xl font-bold">Student Details</DialogTitle>
+            <div className="flex items-center space-x-2">
+              {onEdit && (
+                <Button variant="outline" size="sm" onClick={onEdit}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              )}
+              <Badge className={getStatusColor(student.status)}>
+                {student.status}
+              </Badge>
             </div>
-          </DialogTitle>
+          </div>
         </DialogHeader>
-        
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="academic">Academic</TabsTrigger>
-            <TabsTrigger value="fees">Fees</TabsTrigger>
-            <TabsTrigger value="attendance">Attendance</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="profile" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Personal Information</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <User className="w-4 h-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Full Name</p>
-                      <p className="text-sm text-muted-foreground">{student.name}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Mail className="w-4 h-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Email</p>
-                      <p className="text-sm text-muted-foreground">{student.email}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Phone className="w-4 h-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Phone</p>
-                      <p className="text-sm text-muted-foreground">{student.phone}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Date of Birth</p>
-                      <p className="text-sm text-muted-foreground">January 15, 2000</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="w-4 h-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Address</p>
-                      <p className="text-sm text-muted-foreground">123 Main Street, Mumbai, Maharashtra</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Guardian Information</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div>
-                    <p className="text-sm font-medium">Guardian Name</p>
-                    <p className="text-sm text-muted-foreground">Mr. Rajesh Kumar</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm font-medium">Guardian Phone</p>
-                    <p className="text-sm text-muted-foreground">+91 9876543220</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm font-medium">Relationship</p>
-                    <p className="text-sm text-muted-foreground">Father</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm font-medium">Guardian Email</p>
-                    <p className="text-sm text-muted-foreground">rajesh.kumar@example.com</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="academic" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Institute</CardTitle>
-                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-lg font-bold">{student.institute}</div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Course</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-lg font-bold">{student.course}</div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Batch</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-lg font-bold">{student.batch}</div>
-                </CardContent>
-              </Card>
-            </div>
-            
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Personal Information */}
+          <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Academic Records</CardTitle>
+                <CardTitle className="flex items-center space-x-2">
+                  <User className="w-5 h-5" />
+                  <span>Personal Information</span>
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm font-medium">Admission Date</p>
-                    <p className="text-sm text-muted-foreground">{student.admissionDate}</p>
+                    <label className="text-sm font-medium text-muted-foreground">Full Name</label>
+                    <p className="text-foreground font-medium">{student.name}</p>
                   </div>
-                  
                   <div>
-                    <p className="text-sm font-medium">Current Semester</p>
-                    <p className="text-sm text-muted-foreground">Semester 6</p>
+                    <label className="text-sm font-medium text-muted-foreground">Roll Number</label>
+                    <p className="text-foreground font-medium">{student.rollNumber}</p>
                   </div>
-                  
                   <div>
-                    <p className="text-sm font-medium">Overall Grade</p>
-                    <p className="text-sm text-muted-foreground">A (8.5 GPA)</p>
+                    <label className="text-sm font-medium text-muted-foreground">Date of Birth</label>
+                    <p className="text-foreground">{new Date(student.dateOfBirth).toLocaleDateString()}</p>
                   </div>
-                  
                   <div>
-                    <p className="text-sm font-medium">Attendance Percentage</p>
-                    <p className="text-sm text-muted-foreground">85%</p>
+                    <label className="text-sm font-medium text-muted-foreground">Admission Date</label>
+                    <p className="text-foreground">{new Date(student.admissionDate).toLocaleDateString()}</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="fees" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Fees</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">₹1,50,000</div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Paid Amount</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-success">₹1,20,000</div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Due Amount</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-destructive">₹30,000</div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Payment History</CardTitle>
-              </CardHeader>
-              <CardContent>
+
+                <Separator />
+
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center p-3 border rounded">
-                    <div>
-                      <p className="font-medium">Semester 1 Fees</p>
-                      <p className="text-sm text-muted-foreground">January 15, 2024</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-success">₹25,000</p>
-                      <Badge variant="default">Paid</Badge>
-                    </div>
+                  <div className="flex items-center space-x-3">
+                    <Mail className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-foreground">{student.email}</span>
                   </div>
-                  
-                  <div className="flex justify-between items-center p-3 border rounded">
-                    <div>
-                      <p className="font-medium">Semester 2 Fees</p>
-                      <p className="text-sm text-muted-foreground">March 15, 2024</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-success">₹25,000</p>
-                      <Badge variant="default">Paid</Badge>
-                    </div>
+                  <div className="flex items-center space-x-3">
+                    <Phone className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-foreground">{student.phone}</span>
                   </div>
-                  
-                  <div className="flex justify-between items-center p-3 border rounded">
-                    <div>
-                      <p className="font-medium">Semester 3 Fees</p>
-                      <p className="text-sm text-muted-foreground">Due: August 15, 2024</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-destructive">₹30,000</p>
-                      <Badge variant="destructive">Due</Badge>
-                    </div>
+                  <div className="flex items-start space-x-3">
+                    <MapPin className="w-4 h-4 text-muted-foreground mt-1" />
+                    <span className="text-foreground">{student.address}</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-          
-          <TabsContent value="attendance" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Overall Attendance</CardTitle>
-                  <ClipboardList className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">85%</div>
-                  <p className="text-sm text-muted-foreground">153 out of 180 days</p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">This Month</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">92%</div>
-                  <p className="text-sm text-muted-foreground">23 out of 25 days</p>
-                </CardContent>
-              </Card>
-            </div>
-            
+
+            {/* Academic Information */}
             <Card>
               <CardHeader>
-                <CardTitle>Recent Attendance</CardTitle>
+                <CardTitle className="flex items-center space-x-2">
+                  <GraduationCap className="w-5 h-5" />
+                  <span>Academic Information</span>
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="flex justify-between items-center p-2 border rounded">
-                      <span className="text-sm">August {25 - i}, 2024</span>
-                      <Badge variant={i < 4 ? 'default' : 'destructive'}>
-                        {i < 4 ? 'Present' : 'Absent'}
-                      </Badge>
-                    </div>
-                  ))}
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Institute</label>
+                    <p className="text-foreground font-medium">{student.instituteName}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Course</label>
+                    <p className="text-foreground font-medium">{student.course}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Batch</label>
+                    <p className="text-foreground">{student.batch}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Status</label>
+                    <Badge className={getStatusColor(student.status)} size="sm">
+                      {student.status}
+                    </Badge>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </div>
+
+          {/* Fee Information Sidebar */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <DollarSign className="w-5 h-5" />
+                  <span>Fee Information</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Total Fees</span>
+                    <span className="font-semibold">₹{student.totalFees.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Paid Amount</span>
+                    <span className="font-semibold text-success">₹{student.paidFees.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Pending Amount</span>
+                    <span className="font-semibold text-destructive">₹{pendingFees.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Payment Status</span>
+                    <Badge className={getFeeStatusColor(student.feeStatus)} size="sm">
+                      {student.feeStatus}
+                    </Badge>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span>Progress</span>
+                      <span>{feePercentage.toFixed(1)}%</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div 
+                        className="bg-primary h-2 rounded-full transition-all duration-300" 
+                        style={{ width: `${feePercentage}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
